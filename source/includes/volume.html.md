@@ -109,9 +109,25 @@ type `probe_result` = `struct { ... }`
 ```
 type `probe_results` = `probe_result list`
 
+### volume_type
+```json
+"Data"
+"CBT_Metadata"
+"Data_and_CBT_Metadata"
+```
+type `volume_type` = `variant { ... }`
+
+#### Constructors
+ Name                  | Type | Description                       
+-----------------------|------|-----------------------------------
+ Data                  | unit | Normal data volume                
+ CBT_Metadata          | unit | CBT Metadata only, data destroyed 
+ Data_and_CBT_Metadata | unit | Both Data and CBT Metadata        
 ### volume
 ```json
 {
+  "cbt_enabled": true,
+  "volume_type": "Data",
   "keys": { "keys": "keys" },
   "uri": [ "uri" ],
   "physical_utilisation": 0,
@@ -139,10 +155,14 @@ type `volume` = `struct { ... }`
  physical_utilisation | int64                  | Amount of space currently used on the backing storage \(in bytes\)                                                                                                                                                                                                                                                                                                                  
  uri                  | string list            | A list of URIs which can be opened and by a datapath plugin for I/O. A URI could reference a local block device, a remote NFS share, iSCSI LUN or RBD volume. In cases where the data may be accessed over several protocols, the list should be sorted into descending order of desirability. Xapi will open the most desirable URI for which it has an available datapath plugin. 
  keys                 | (string * string) list | A list of key=value pairs which have been stored in the Volume metadata. These should not be interpreted by the Volume plugin.                                                                                                                                                                                                                                                      
+ volume_type          | volume_type option     | The content type of this volume                                                                                                                                                                                                                                                                                                                                                     
+ cbt_enabled          | bool option            | True means that the storage datapath will track changed dirty blocks while writing and will be able to provide CBT Metadata when requested                                                                                                                                                                                                                                          
 ### volumes
 ```json
 [
   {
+    "cbt_enabled": true,
+    "volume_type": "Data",
     "keys": { "keys": "keys" },
     "uri": [ "uri" ],
     "physical_utilisation": 0,
@@ -929,6 +949,8 @@ if __name__ == "__main__":
 ```json
 [
   {
+    "cbt_enabled": true,
+    "volume_type": "Data",
     "keys": { "field_1": "value_1", "field_2": "value_2" },
     "uri": [ "uri_1", "uri_2" ],
     "physical_utilisation": 0,
@@ -941,6 +963,8 @@ if __name__ == "__main__":
     "key": "key"
   },
   {
+    "cbt_enabled": true,
+    "volume_type": "Data",
     "keys": { "field_1": "value_1", "field_2": "value_2" },
     "uri": [ "uri_1", "uri_2" ],
     "physical_utilisation": 0,
@@ -980,7 +1004,7 @@ class SR_myimplementation(SR_skeleton):
         """
         [ls sr] returns a list of volumes contained within an attached SR.
         """
-        return [{"key": "string", "uuid": None, "name": "string", "description": "string", "read_write": True, "sharable": True, "virtual_size": long(0), "physical_utilisation": long(0), "uri": ["string"], "keys": {"string": "string"}}]
+        return [{"key": "string", "uuid": None, "name": "string", "description": "string", "read_write": True, "sharable": True, "virtual_size": long(0), "physical_utilisation": long(0), "uri": ["string"], "keys": {"string": "string"}, "volume_type": None, "cbt_enabled": None}]
     # ...
 ```
 
@@ -1043,6 +1067,8 @@ if __name__ == "__main__":
 
 ```json
 {
+  "cbt_enabled": true,
+  "volume_type": "Data",
   "keys": { "field_1": "value_1", "field_2": "value_2" },
   "uri": [ "uri_1", "uri_2" ],
   "physical_utilisation": 0,
@@ -1084,7 +1110,7 @@ class Volume_myimplementation(Volume_skeleton):
         is always permissable for an implementation to round-up the volume to
         the nearest convenient block size
         """
-        return {"key": "string", "uuid": None, "name": "string", "description": "string", "read_write": True, "sharable": True, "virtual_size": long(0), "physical_utilisation": long(0), "uri": ["string"], "keys": {"string": "string"}}
+        return {"key": "string", "uuid": None, "name": "string", "description": "string", "read_write": True, "sharable": True, "virtual_size": long(0), "physical_utilisation": long(0), "uri": ["string"], "keys": {"string": "string"}, "volume_type": None, "cbt_enabled": None}
     # ...
 ```
 
@@ -1140,6 +1166,8 @@ if __name__ == "__main__":
 
 ```json
 {
+  "cbt_enabled": true,
+  "volume_type": "Data",
   "keys": { "field_1": "value_1", "field_2": "value_2" },
   "uri": [ "uri_1", "uri_2" ],
   "physical_utilisation": 0,
@@ -1185,7 +1213,7 @@ class Volume_myimplementation(Volume_skeleton):
         can only be taken on the host that has the VDI active (if any).
         XAPI will take care of redirecting the request to the proper host
         """
-        return {"key": "string", "uuid": None, "name": "string", "description": "string", "read_write": True, "sharable": True, "virtual_size": long(0), "physical_utilisation": long(0), "uri": ["string"], "keys": {"string": "string"}}
+        return {"key": "string", "uuid": None, "name": "string", "description": "string", "read_write": True, "sharable": True, "virtual_size": long(0), "physical_utilisation": long(0), "uri": ["string"], "keys": {"string": "string"}, "volume_type": None, "cbt_enabled": None}
     # ...
 ```
 
@@ -1238,6 +1266,8 @@ if __name__ == "__main__":
 
 ```json
 {
+  "cbt_enabled": true,
+  "volume_type": "Data",
   "keys": { "field_1": "value_1", "field_2": "value_2" },
   "uri": [ "uri_1", "uri_2" ],
   "physical_utilisation": 0,
@@ -1278,7 +1308,7 @@ class Volume_myimplementation(Volume_skeleton):
         [volume] in [sr]. Note the name and description are copied but any
         extra metadata associated by [set] is not copied.
         """
-        return {"key": "string", "uuid": None, "name": "string", "description": "string", "read_write": True, "sharable": True, "virtual_size": long(0), "physical_utilisation": long(0), "uri": ["string"], "keys": {"string": "string"}}
+        return {"key": "string", "uuid": None, "name": "string", "description": "string", "read_write": True, "sharable": True, "virtual_size": long(0), "physical_utilisation": long(0), "uri": ["string"], "keys": {"string": "string"}, "volume_type": None, "cbt_enabled": None}
     # ...
 ```
 
@@ -1333,6 +1363,8 @@ if __name__ == "__main__":
 
 ```json
 {
+  "cbt_enabled": true,
+  "volume_type": "Data",
   "keys": { "field_1": "value_1", "field_2": "value_2" },
   "uri": [ "uri_1", "uri_2" ],
   "physical_utilisation": 0,
@@ -1379,7 +1411,7 @@ class Volume_myimplementation(Volume_skeleton):
         rejected then the caller will be expected to fall back to performing a
         blockwise copy.
         """
-        return {"key": "string", "uuid": None, "name": "string", "description": "string", "read_write": True, "sharable": True, "virtual_size": long(0), "physical_utilisation": long(0), "uri": ["string"], "keys": {"string": "string"}}
+        return {"key": "string", "uuid": None, "name": "string", "description": "string", "read_write": True, "sharable": True, "virtual_size": long(0), "physical_utilisation": long(0), "uri": ["string"], "keys": {"string": "string"}, "volume_type": None, "cbt_enabled": None}
     # ...
 ```
 
@@ -1925,6 +1957,8 @@ if __name__ == "__main__":
 
 ```json
 {
+  "cbt_enabled": true,
+  "volume_type": "Data",
   "keys": { "field_1": "value_1", "field_2": "value_2" },
   "uri": [ "uri_1", "uri_2" ],
   "physical_utilisation": 0,
@@ -1963,7 +1997,7 @@ class Volume_myimplementation(Volume_skeleton):
         """
         [stat sr volume] returns metadata associated with [volume].
         """
-        return {"key": "string", "uuid": None, "name": "string", "description": "string", "read_write": True, "sharable": True, "virtual_size": long(0), "physical_utilisation": long(0), "uri": ["string"], "keys": {"string": "string"}}
+        return {"key": "string", "uuid": None, "name": "string", "description": "string", "read_write": True, "sharable": True, "virtual_size": long(0), "physical_utilisation": long(0), "uri": ["string"], "keys": {"string": "string"}, "volume_type": None, "cbt_enabled": None}
     # ...
 ```
 

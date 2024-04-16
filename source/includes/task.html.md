@@ -17,9 +17,25 @@ The Task interface is required if the backend supports long-running  tasks.
 ```
 type `id` = `string`
 Unique identifier for a task.
+### volume_type
+```json
+"Data"
+"CBT_Metadata"
+"Data_and_CBT_Metadata"
+```
+type `volume_type` = `variant { ... }`
+
+#### Constructors
+ Name                  | Type | Description                       
+-----------------------|------|-----------------------------------
+ Data                  | unit | Normal data volume                
+ CBT_Metadata          | unit | CBT Metadata only, data destroyed 
+ Data_and_CBT_Metadata | unit | Both Data and CBT Metadata        
 ### volume
 ```json
 {
+  "cbt_enabled": true,
+  "volume_type": "Data",
   "keys": { "keys": "keys" },
   "uri": [ "uri" ],
   "physical_utilisation": 0,
@@ -47,12 +63,16 @@ type `volume` = `struct { ... }`
  physical_utilisation | int64                  | Amount of space currently used on the backing storage \(in bytes\)                                                                                                                                                                                                                                                                                                                  
  uri                  | string list            | A list of URIs which can be opened and by a datapath plugin for I/O. A URI could reference a local block device, a remote NFS share, iSCSI LUN or RBD volume. In cases where the data may be accessed over several protocols, the list should be sorted into descending order of desirability. Xapi will open the most desirable URI for which it has an available datapath plugin. 
  keys                 | (string * string) list | A list of key=value pairs which have been stored in the Volume metadata. These should not be interpreted by the Volume plugin.                                                                                                                                                                                                                                                      
+ volume_type          | volume_type option     | The content type of this volume                                                                                                                                                                                                                                                                                                                                                     
+ cbt_enabled          | bool option            | True means that the storage datapath will track changed dirty blocks while writing and will be able to provide CBT Metadata when requested                                                                                                                                                                                                                                          
 ### async_result_t
 ```json
 "UnitResult"
 [
   "Volume",
   {
+    "cbt_enabled": true,
+    "volume_type": "Data",
     "keys": { "keys": "keys" },
     "uri": [ "uri" ],
     "physical_utilisation": 0,
