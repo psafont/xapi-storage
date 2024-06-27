@@ -21,14 +21,18 @@ Plugin-specific configuration which describes where and how to locate the storag
 ```json
 [ "Healthy", "health" ]
 [ "Recovering", "health" ]
+[ "Unreachable", "health" ]
+[ "Unavailable", "health" ]
 ```
 type `health` = `variant { ... }`
 
 #### Constructors
- Name       | Type   | Description                                         
-------------|--------|-----------------------------------------------------
- Healthy    | string | Storage is fully available                          
- Recovering | string | Storage is busy recovering, e.g. rebuilding mirrors 
+ Name        | Type   | Description                                                           
+-------------|--------|-----------------------------------------------------------------------
+ Healthy     | string | Storage is fully available                                            
+ Recovering  | string | Storage is busy recovering, e.g. rebuilding mirrors                   
+ Unreachable | string | Storage is unreachable but may be recoverable with admin intervention 
+ Unavailable | string | Storage is unavailable, a host reboot will be required                
 ### sr_stat
 ```json
 {
